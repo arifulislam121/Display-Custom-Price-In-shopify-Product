@@ -1,0 +1,37 @@
+{% comment %}
+  custom price
+{% endcomment %}
+
+<div style="" id="pakageContent_New">
+  {% capture package_content_value %}
+  {% assign metafield_labels = 'Pakinhoud' | split: ',' %}
+  {% assign metafield_keys = 'pakinhoudj' | split: ',' %}
+  {% assign metafield_fields = 'pakinhoud_label' | split: ',' %}
+
+  {% for metafield_key in metafield_keys %}
+    {% assign index = forloop.index0 %}
+    {% assign metafield_field = metafield_fields[index] %}
+    {% assign metafield_values = product.metafields.custom[metafield_key].value %}
+
+    {% if metafield_values != blank %}
+      {% for item in metafield_values %}
+        {{ item[metafield_field] -}}
+        {%- unless forloop.last %}, {% endunless %}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endcapture %}
+</div>
+
+{% assign product_price = product.price %}
+{% assign unit_count = package_content_value %}
+{% assign clean_value = unit_count | replace: "m2", "" %}
+{% assign product_unit_price = product_price | divided_by: clean_value %}
+
+{% if product_unit_price != blank %}
+  <h3 id="pcusprice">{{ product_unit_price | money }} /m2</h3>
+{% else %}
+  {% comment %}
+    <h3 id="pcusprice">€ 0.00 /m2</h3>
+  {% endcomment %}
+{% endif %}
