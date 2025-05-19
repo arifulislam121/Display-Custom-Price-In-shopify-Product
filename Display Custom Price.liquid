@@ -25,13 +25,63 @@
 
 {% assign product_price = product.price %}
 {% assign unit_count = package_content_value %}
-{% assign clean_value = unit_count | replace: "m2", "" %}
+{% assign clean_value = unit_count | replace: 'm2', '' %}
 {% assign product_unit_price = product_price | divided_by: clean_value %}
+{% assign product_compare_price = compare_at_price | divided_by: clean_value %}
 
 {% if product_unit_price != blank %}
-  <h3 id="pcusprice">{{ product_unit_price | money }} /m2</h3>
+  <h3 id="pcusprice">
+    <span id="regprice"> {{ product_unit_price | money }} m² </span>
+    {% if product.compare_at_price != blank %}
+      &nbsp;<s>{{ product_compare_price | money }} m²</s>
+{% comment %}
+  &nbsp;<s>{{ product.compare_at_price | money }} m²</s>
+{% endcomment %}
+    {% endif %}
+  </h3>
 {% else %}
+  {% if product.compare_at_price > product.price %}
+    <h3>
+      <span id="regprice">{{ product.price | money }} m²</span>
+      &nbsp;<s>{{ product_compare_price | money }} m²</s>
+{% comment %}
+  &nbsp;<s>{{ product.compare_at_price | money }} m²</s>
+{% endcomment %}
+    </h3>
+  {% else %}
+    <h3>{{ product.price | money }}</h3>
+  {% endif %}
+
   {% comment %}
-    <h3 id="pcusprice">€ 0.00 /m2</h3>
+    <h3 id="pcusprice">{{ product.price | money }} m²</h3>
+      <h3 id="pcusprice">€ 0.00 /m2</h3>
   {% endcomment %}
+{% endif %}
+
+{% comment %}
+  =============package price display=============
+{% endcomment %}
+{% assign clean_value = unit_count | replace: 'm2', '' %}
+{% assign multiplied_value = product_unit_price | times: clean_value %}
+
+{% assign target_collections = 'pvc,laminaat,ondervloeren' | split: ',' %}
+{% assign show_packageprice = false %}
+
+{% for collection in product.collections %}
+  {% if target_collections contains collection.handle %}
+    {% assign show_packageprice = true %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% if show_packageprice %}
+  {% if template.name == 'product' %}
+    {% if clean_value != blank %}
+      {% if multiplied_value != blank %}
+        <h4 id="packprice">
+          <span id="regprice"> Pakprijs: {{ multiplied_value | money }} </span>
+        </h4>
+      {% endif %}
+    {% endif %}
+  {% endif %}
 {% endif %}
